@@ -115,11 +115,11 @@ export default async function JobsPage() {
                   </div>
 
                   <a
-                    href="/login"
-                    className="rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
-                  >
-                    Apply Now
-                  </a>
+                        href={`/jobs/${job.id}`}
+                        className="rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                        View Details
+                 </a>
                 </div>
               </div>
             ))}
