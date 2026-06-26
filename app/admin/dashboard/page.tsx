@@ -1,37 +1,89 @@
+import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 
-const stats = [
-  { label: "Total Users", value: "128" },
-  { label: "Recruiters", value: "24" },
-  { label: "Candidates", value: "96" },
-  { label: "Open Jobs", value: "32" },
-];
+function formatStatus(status: string) {
+  return status
+    .replace("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
 
 export default async function AdminDashboardPage() {
   const session = await requireRole(["ADMIN"]);
+
+  const [
+    totalUsers,
+    totalRecruiters,
+    totalCandidates,
+    totalJobs,
+    totalApplications,
+    totalCompanies,
+    totalCategories,
+    recentApplications,
+  ] = await Promise.all([
+    prisma.user.count(),
+    prisma.user.count({
+      where: {
+        role: "RECRUITER",
+      },
+    }),
+    prisma.user.count({
+      where: {
+        role: "CANDIDATE",
+      },
+    }),
+    prisma.job.count(),
+    prisma.application.count(),
+    prisma.company.count(),
+    prisma.category.count(),
+    prisma.application.findMany({
+      take: 5,
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        candidate: true,
+        job: {
+          include: {
+            company: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  const stats = [
+    { label: "Total Users", value: totalUsers },
+    { label: "Recruiters", value: totalRecruiters },
+    { label: "Candidates", value: totalCandidates },
+    { label: "Open Jobs", value: totalJobs },
+    { label: "Applications", value: totalApplications },
+    { label: "Companies", value: totalCompanies },
+    { label: "Categories", value: totalCategories },
+  ];
 
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between">
-            <a href="/" className="text-sm font-medium text-blue-600">
+          <a href="/" className="text-sm font-medium text-blue-600">
             ← Career Craft
-            </a>
+          </a>
 
-            <div className="flex gap-3">
+          <div className="flex gap-3">
             <a
-                href="/jobs"
-                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              href="/jobs"
+              className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-                Jobs
+              Jobs
             </a>
             <a
-                href="/logout"
-                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+              href="/logout"
+              className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
             >
-                Logout
+              Logout
             </a>
-            </div>
+          </div>
         </div>
 
         <div className="mt-6 rounded-3xl bg-slate-950 p-8 text-white">
@@ -43,7 +95,7 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-4">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-2xl bg-white p-6 shadow-sm">
               <p className="text-sm text-slate-500">{stat.label}</p>
@@ -56,11 +108,40 @@ export default async function AdminDashboardPage() {
 
         <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
           <h2 className="text-xl font-bold text-slate-900">Recent Activity</h2>
-          <ul className="mt-4 space-y-3 text-slate-600">
-            <li>New recruiter account created.</li>
-            <li>Candidate applied for Frontend Developer.</li>
-            <li>Admin added a new job category.</li>
-          </ul>
+
+          {recentApplications.length === 0 ? (
+            <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <p className="font-medium text-slate-900">No recent activity</p>
+              <p className="mt-1 text-sm text-slate-600">
+                Applications will appear here after candidates apply for jobs.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 space-y-4">
+              {recentApplications.map((application) => (
+                <div
+                  key={application.id}
+                  className="rounded-xl border border-slate-200 p-4"
+                >
+                  <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
+                    <div>
+                      <p className="font-semibold text-slate-900">
+                        {application.candidate.name} applied for{" "}
+                        {application.job.title}
+                      </p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {application.job.company.name}
+                      </p>
+                    </div>
+
+                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                      {formatStatus(application.status)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </main>
