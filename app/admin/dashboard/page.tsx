@@ -1,3 +1,5 @@
+import { requireRole } from "@/lib/auth";
+
 const stats = [
   { label: "Total Users", value: "128" },
   { label: "Recruiters", value: "24" },
@@ -5,7 +7,9 @@ const stats = [
   { label: "Open Jobs", value: "32" },
 ];
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const session = await requireRole(["ADMIN"]);
+
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
@@ -17,8 +21,8 @@ export default function AdminDashboardPage() {
           <p className="text-sm text-blue-200">Admin Area</p>
           <h1 className="mt-2 text-3xl font-bold">Admin Dashboard</h1>
           <p className="mt-2 text-slate-300">
-            Manage users, recruiters, companies, job categories, and platform
-            analytics.
+            Welcome, {session.name}. Manage users, recruiters, companies, job
+            categories, and platform analytics.
           </p>
         </div>
 
