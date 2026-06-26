@@ -1,28 +1,26 @@
-const jobs = [
-  {
-    title: "Frontend Developer",
-    company: "TechNova Solutions",
-    location: "Colombo",
-    type: "Full Time",
-    salary: "LKR 120,000 - 180,000",
-  },
-  {
-    title: "UI/UX Designer",
-    company: "Creative Labs",
-    location: "Remote",
-    type: "Contract",
-    salary: "LKR 90,000 - 140,000",
-  },
-  {
-    title: "Junior Full Stack Developer",
-    company: "CareerHub",
-    location: "Kandy",
-    type: "Full Time",
-    salary: "LKR 100,000 - 160,000",
-  },
-];
+import prisma from "@/lib/prisma";
 
-export default function JobsPage() {
+function formatJobType(type: string) {
+  return type
+    .replace("_", " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+export default async function JobsPage() {
+  const jobs = await prisma.job.findMany({
+    where: {
+      isActive: true,
+    },
+    include: {
+      company: true,
+      category: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
@@ -35,7 +33,7 @@ export default function JobsPage() {
               Open Jobs
             </h1>
             <p className="mt-2 text-slate-600">
-              Browse available jobs and apply for the best opportunity.
+              Browse real jobs loaded from the Supabase PostgreSQL database.
             </p>
           </div>
 
@@ -61,45 +59,72 @@ export default function JobsPage() {
             <option>Full Time</option>
             <option>Part Time</option>
             <option>Contract</option>
+            <option>Internship</option>
             <option>Remote</option>
           </select>
         </div>
 
-        <div className="grid gap-5">
-          {jobs.map((job) => (
-            <div
-              key={job.title}
-              className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
-            >
-              <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-                <div>
-                  <h2 className="text-xl font-bold text-slate-900">
-                    {job.title}
-                  </h2>
-                  <p className="mt-1 text-slate-600">{job.company}</p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-700">
-                      {job.location}
-                    </span>
-                    <span className="rounded-full bg-green-100 px-3 py-1 text-green-700">
-                      {job.type}
-                    </span>
-                    <span className="rounded-full bg-purple-100 px-3 py-1 text-purple-700">
-                      {job.salary}
-                    </span>
-                  </div>
-                </div>
+        {jobs.length === 0 ? (
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">
+              No jobs available
+            </h2>
+            <p className="mt-2 text-slate-600">
+              Please check again later for new job opportunities.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">
+                      {job.title}
+                    </h2>
+                    <p className="mt-1 text-slate-600">{job.company.name}</p>
 
-                <a
-                  href="/login"
-                  className="rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
-                >
-                  Apply Now
-                </a>
+                    <p className="mt-3 max-w-3xl text-sm text-slate-600">
+                      {job.description}
+                    </p>
+
+                    <div className="mt-4 flex flex-wrap gap-2 text-sm">
+                      <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-700">
+                        {job.location}
+                      </span>
+
+                      <span className="rounded-full bg-green-100 px-3 py-1 text-green-700">
+                        {formatJobType(job.type)}
+                      </span>
+
+                      {job.salary && (
+                        <span className="rounded-full bg-purple-100 px-3 py-1 text-purple-700">
+                          {job.salary}
+                        </span>
+                      )}
+
+                      {job.category && (
+                        <span className="rounded-full bg-orange-100 px-3 py-1 text-orange-700">
+                          {job.category.name}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <a
+                    href="/login"
+                    className="rounded-xl bg-blue-600 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700"
+                  >
+                    Apply Now
+                  </a>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
