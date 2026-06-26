@@ -1,15 +1,170 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  RECRUITER
+  CANDIDATE
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+  REMOTE
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SHORTLISTED
+  INTERVIEW
+  OFFERED
+  REJECTED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(CANDIDATE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile               CandidateProfile?
+  recruiterCompanies    Company[]         @relation("RecruiterCompanies")
+  recruiterJobs         Job[]             @relation("RecruiterJobs")
+  candidateApplications Application[]     @relation("CandidateApplications")
+}
+
+model CandidateProfile {
+  id        String   @id @default(cuid())
+  phone     String?
+  location  String?
+  bio       String?
+  cvUrl     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  skills         Skill[]
+  education      Education[]
+  workExperience WorkExperience[]
+}
+
+model Skill {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Education {
+  id           String   @id @default(cuid())
+  school       String
+  degree       String
+  fieldOfStudy String?
+  startYear    Int?
+  endYear      Int?
+  createdAt    DateTime @default(now())
+
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model WorkExperience {
+  id          String    @id @default(cuid())
+  companyName String
+  jobTitle    String
+  startDate   DateTime?
+  endDate     DateTime?
+  description String?
+  createdAt   DateTime  @default(now())
+
+  profileId String
+  profile   CandidateProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  website     String?
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  recruiterId String?
+  recruiter   User?   @relation("RecruiterCompanies", fields: [recruiterId], references: [id], onDelete: SetNull)
+
+  jobs Job[]
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  jobs Job[]
+}
+
+model Job {
+  id           String   @id @default(cuid())
+  title        String
+  description  String
+  requirements String
+  location     String
+  salary       String?
+  type         JobType  @default(FULL_TIME)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  recruiterId String
+  recruiter   User   @relation("RecruiterJobs", fields: [recruiterId], references: [id], onDelete: Cascade)
+
+  applications Application[]
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  coverLetter String?
+  status      ApplicationStatus @default(APPLIED)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  candidateId String
+  candidate   User   @relation("CandidateApplications", fields: [candidateId], references: [id], onDelete: Cascade)
+
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, jobId])
+}
+
+model PlatformSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
