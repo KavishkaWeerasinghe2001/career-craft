@@ -14,9 +14,26 @@ export default async function RecruiterDashboardPage() {
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
-        <a href="/" className="text-sm font-medium text-blue-600">
-          ← Back to Home
-        </a>
+        <div className="flex items-center justify-between">
+            <a href="/" className="text-sm font-medium text-blue-600">
+            ← Career Craft
+            </a>
+
+            <div className="flex gap-3">
+            <a
+                href="/jobs"
+                className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+                Jobs
+            </a>
+            <a
+                href="/logout"
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+            >
+                Logout
+            </a>
+            </div>
+        </div>
 
         <div className="mt-6 rounded-3xl bg-slate-950 p-8 text-white">
           <p className="text-sm text-green-200">Recruiter Area</p>
