@@ -7,19 +7,88 @@ function formatJobType(type: string) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export default async function JobsPage() {
+const jobTypeOptions = [
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACT",
+  "INTERNSHIP",
+  "REMOTE",
+] as const;
+
+type JobTypeValue = (typeof jobTypeOptions)[number];
+
+type JobsPageProps = {
+  searchParams: Promise<{
+    q?: string;
+    location?: string;
+    type?: string;
+  }>;
+};
+
+export default async function JobsPage({ searchParams }: JobsPageProps) {
+  const params = await searchParams;
+
+  const search = params.q?.trim() ?? "";
+  const location = params.location?.trim() ?? "";
+  const type = params.type?.trim() ?? "";
+
+  const selectedType = jobTypeOptions.includes(type as JobTypeValue)
+    ? (type as JobTypeValue)
+    : "";
   const jobs = await prisma.job.findMany({
     where: {
-      isActive: true,
+        isActive: true,
+
+        ...(search
+        ? {
+            OR: [
+                {
+                title: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                },
+                },
+                {
+                description: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                },
+                },
+                {
+                company: {
+                    name: {
+                    contains: search,
+                    mode: "insensitive" as const,
+                    },
+                },
+                },
+            ],
+            }
+        : {}),
+
+        ...(location
+        ? {
+            location: {
+                contains: location,
+                mode: "insensitive" as const,
+            },
+            }
+        : {}),
+
+        ...(selectedType
+        ? {
+            type: selectedType,
+            }
+        : {}),
     },
     include: {
-      company: true,
-      category: true,
+        company: true,
+        category: true,
     },
     orderBy: {
-      createdAt: "desc",
+        createdAt: "desc",
     },
-  });
+    });
 
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
@@ -45,24 +114,50 @@ export default async function JobsPage() {
           </a>
         </div>
 
-        <div className="mb-6 grid gap-4 md:grid-cols-3">
-          <input
-            placeholder="Search job title"
-            className="rounded-xl border border-slate-300 px-4 py-3"
-          />
-          <input
-            placeholder="Location"
-            className="rounded-xl border border-slate-300 px-4 py-3"
-          />
-          <select className="rounded-xl border border-slate-300 px-4 py-3">
-            <option>All Job Types</option>
-            <option>Full Time</option>
-            <option>Part Time</option>
-            <option>Contract</option>
-            <option>Internship</option>
-            <option>Remote</option>
-          </select>
-        </div>
+        <form method="GET" className="mb-6 grid gap-4 md:grid-cols-4">
+            <input
+                name="q"
+                placeholder="Search job title or company"
+                defaultValue={search}
+                className="rounded-xl border border-slate-300 px-4 py-3"
+            />
+
+            <input
+                name="location"
+                placeholder="Location"
+                defaultValue={location}
+                className="rounded-xl border border-slate-300 px-4 py-3"
+            />
+
+            <select
+                name="type"
+                defaultValue={selectedType}
+                className="rounded-xl border border-slate-300 px-4 py-3"
+            >
+                <option value="">All Job Types</option>
+                {jobTypeOptions.map((jobType) => (
+                <option key={jobType} value={jobType}>
+                    {formatJobType(jobType)}
+                </option>
+                ))}
+            </select>
+
+            <div className="flex gap-3">
+                <button
+                type="submit"
+                className="flex-1 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                Search
+                </button>
+
+                <a
+                href="/jobs"
+                className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                Clear
+                </a>
+            </div>
+        </form>
 
         {jobs.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
