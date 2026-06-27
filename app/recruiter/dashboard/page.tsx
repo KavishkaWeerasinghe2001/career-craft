@@ -17,6 +17,16 @@ const statusOptions = [
   "REJECTED",
 ] as const;
 
+const jobTypeOptions = [
+  "FULL_TIME",
+  "PART_TIME",
+  "CONTRACT",
+  "INTERNSHIP",
+  "REMOTE",
+] as const;
+
+type JobTypeValue = (typeof jobTypeOptions)[number];
+
 type ApplicationStatusValue = (typeof statusOptions)[number];
 
 async function updateApplicationStatus(formData: FormData) {
@@ -46,10 +56,54 @@ async function updateApplicationStatus(formData: FormData) {
   revalidatePath("/recruiter/dashboard");
 }
 
+async function createJobPost(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["RECRUITER"]);
+
+  const title = formData.get("title")?.toString();
+  const description = formData.get("description")?.toString();
+  const requirements = formData.get("requirements")?.toString();
+  const location = formData.get("location")?.toString();
+  const salary = formData.get("salary")?.toString();
+  const type = formData.get("type")?.toString();
+  const companyId = formData.get("companyId")?.toString();
+  const categoryId = formData.get("categoryId")?.toString();
+
+  if (
+    !title ||
+    !description ||
+    !requirements ||
+    !location ||
+    !companyId ||
+    !type ||
+    !jobTypeOptions.includes(type as JobTypeValue)
+  ) {
+    return;
+  }
+
+  await prisma.job.create({
+    data: {
+      title,
+      description,
+      requirements,
+      location,
+      salary: salary || null,
+      type: type as JobTypeValue,
+      companyId,
+      categoryId: categoryId || null,
+      recruiterId: session.userId,
+    },
+  });
+
+  revalidatePath("/recruiter/dashboard");
+  revalidatePath("/jobs");
+}
+
 export default async function RecruiterDashboardPage() {
   const session = await requireRole(["RECRUITER"]);
 
-  const [jobs, applications] = await Promise.all([
+  const [jobs, applications, companies, categories] = await Promise.all([
     prisma.job.findMany({
       where: {
         recruiterId: session.userId,
@@ -79,6 +133,21 @@ export default async function RecruiterDashboardPage() {
       },
       orderBy: {
         createdAt: "desc",
+      },
+       }),
+
+    prisma.company.findMany({
+      where: {
+        recruiterId: session.userId,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    }),
+
+    prisma.category.findMany({
+      orderBy: {
+        name: "asc",
       },
     }),
   ]);
@@ -156,6 +225,98 @@ export default async function RecruiterDashboardPage() {
               </h2>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">Create Job Post</h2>
+
+            {companies.length === 0 ? (
+                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <p className="font-medium text-slate-900">No company found</p>
+                <p className="mt-1 text-sm text-slate-600">
+                    You need a company before creating job posts.
+                </p>
+                </div>
+            ) : (
+                <form action={createJobPost} className="mt-4 grid gap-4 md:grid-cols-2">
+                <input
+                    name="title"
+                    placeholder="Job title"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                    name="location"
+                    placeholder="Location"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                    name="salary"
+                    placeholder="Salary, example: Rs. 150,000"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <select
+                    name="type"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                >
+                    {jobTypeOptions.map((type) => (
+                    <option key={type} value={type}>
+                        {formatStatus(type)}
+                    </option>
+                    ))}
+                </select>
+
+                <select
+                    name="companyId"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                >
+                    {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                        {company.name}
+                    </option>
+                    ))}
+                </select>
+
+                <select
+                    name="categoryId"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                >
+                    <option value="">No category</option>
+                    {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                        {category.name}
+                    </option>
+                    ))}
+                </select>
+
+                <textarea
+                    name="description"
+                    placeholder="Job description"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                />
+
+                <textarea
+                    name="requirements"
+                    placeholder="Job requirements"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                />
+
+                <button
+                    type="submit"
+                    className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 md:col-span-2"
+                >
+                    Create Job
+                </button>
+                </form>
+            )}
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
