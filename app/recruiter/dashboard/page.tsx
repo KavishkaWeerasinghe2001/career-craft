@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 function formatStatus(status: string) {
   return status
@@ -53,7 +54,8 @@ async function updateApplicationStatus(formData: FormData) {
     },
   });
 
-  revalidatePath("/recruiter/dashboard");
+ revalidatePath("/recruiter/dashboard");
+ redirect("/recruiter/dashboard");
 }
 
 async function createJobPost(formData: FormData) {

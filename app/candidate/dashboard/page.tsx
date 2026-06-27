@@ -1,11 +1,44 @@
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 function formatStatus(status: string) {
   return status
     .replace("_", " ")
     .toLowerCase()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+async function updateCandidateProfile(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["CANDIDATE"]);
+
+  const phone = formData.get("phone")?.toString();
+  const location = formData.get("location")?.toString();
+  const bio = formData.get("bio")?.toString();
+  const cvUrl = formData.get("cvUrl")?.toString();
+
+  await prisma.candidateProfile.upsert({
+    where: {
+      userId: session.userId,
+    },
+    update: {
+      phone: phone || null,
+      location: location || null,
+      bio: bio || null,
+      cvUrl: cvUrl || null,
+    },
+    create: {
+      userId: session.userId,
+      phone: phone || null,
+      location: location || null,
+      bio: bio || null,
+      cvUrl: cvUrl || null,
+    },
+  });
+
+  revalidatePath("/candidate/dashboard");
 }
 
 export default async function CandidateDashboardPage() {
@@ -114,6 +147,47 @@ export default async function CandidateDashboardPage() {
               {interviewCount}
             </h2>
           </div>
+        </div>
+
+        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">My Profile</h2>
+
+            <form action={updateCandidateProfile} className="mt-4 grid gap-4 md:grid-cols-2">
+                <input
+                name="phone"
+                placeholder="Phone number"
+                defaultValue={profile?.phone ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                name="location"
+                placeholder="Location"
+                defaultValue={profile?.location ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                name="cvUrl"
+                placeholder="CV URL"
+                defaultValue={profile?.cvUrl ?? ""}
+                className="rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                />
+
+                <textarea
+                name="bio"
+                placeholder="Short bio"
+                defaultValue={profile?.bio ?? ""}
+                className="min-h-28 rounded-xl border border-slate-300 px-4 py-3 text-sm md:col-span-2"
+                />
+
+                <button
+                type="submit"
+                className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 md:col-span-2"
+                >
+                Update Profile
+                </button>
+            </form>
         </div>
 
         <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
