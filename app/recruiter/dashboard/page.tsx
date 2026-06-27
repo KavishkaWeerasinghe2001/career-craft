@@ -1,11 +1,49 @@
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 function formatStatus(status: string) {
   return status
     .replace("_", " ")
     .toLowerCase()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+const statusOptions = [
+  "APPLIED",
+  "SHORTLISTED",
+  "INTERVIEW",
+  "OFFERED",
+  "REJECTED",
+] as const;
+
+type ApplicationStatusValue = (typeof statusOptions)[number];
+
+async function updateApplicationStatus(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["RECRUITER"]);
+
+  const applicationId = formData.get("applicationId")?.toString();
+  const status = formData.get("status")?.toString();
+
+  if (!applicationId || !statusOptions.includes(status as ApplicationStatusValue)) {
+    return;
+  }
+
+  await prisma.application.updateMany({
+    where: {
+      id: applicationId,
+      job: {
+        recruiterId: session.userId,
+      },
+    },
+    data: {
+      status: status as ApplicationStatusValue,
+    },
+  });
+
+  revalidatePath("/recruiter/dashboard");
 }
 
 export default async function RecruiterDashboardPage() {
@@ -185,9 +223,28 @@ export default async function RecruiterDashboardPage() {
                         </p>
                       </div>
 
-                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
-                        {formatStatus(application.status)}
-                      </span>
+                      <form action={updateApplicationStatus} className="flex flex-wrap items-center gap-2">
+                        <input type="hidden" name="applicationId" value={application.id} />
+
+                        <select
+                            name="status"
+                            defaultValue={application.status}
+                            className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700"
+                        >
+                            {statusOptions.map((status) => (
+                            <option key={status} value={status}>
+                                {formatStatus(status)}
+                            </option>
+                            ))}
+                        </select>
+
+                        <button
+                            type="submit"
+                            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            Update
+                        </button>
+                      </form>
                     </div>
                   </div>
                 ))}
