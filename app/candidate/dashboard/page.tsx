@@ -41,6 +41,107 @@ async function updateCandidateProfile(formData: FormData) {
   revalidatePath("/candidate/dashboard");
 }
 
+async function getCandidateProfileId(userId: string) {
+  const profile = await prisma.candidateProfile.upsert({
+    where: {
+      userId,
+    },
+    update: {},
+    create: {
+      userId,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  return profile.id;
+}
+
+async function addSkill(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["CANDIDATE"]);
+  const name = formData.get("name")?.toString();
+
+  if (!name) {
+    return;
+  }
+
+  const profileId = await getCandidateProfileId(session.userId);
+
+  await prisma.skill.create({
+    data: {
+      name,
+      profileId,
+    },
+  });
+
+  revalidatePath("/candidate/dashboard");
+}
+
+async function addEducation(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["CANDIDATE"]);
+
+  const school = formData.get("school")?.toString();
+  const degree = formData.get("degree")?.toString();
+  const fieldOfStudy = formData.get("fieldOfStudy")?.toString();
+  const startYear = formData.get("startYear")?.toString();
+  const endYear = formData.get("endYear")?.toString();
+
+  if (!school || !degree) {
+    return;
+  }
+
+  const profileId = await getCandidateProfileId(session.userId);
+
+  await prisma.education.create({
+    data: {
+      school,
+      degree,
+      fieldOfStudy: fieldOfStudy || null,
+      startYear: startYear ? Number(startYear) : null,
+      endYear: endYear ? Number(endYear) : null,
+      profileId,
+    },
+  });
+
+  revalidatePath("/candidate/dashboard");
+}
+
+async function addWorkExperience(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["CANDIDATE"]);
+
+  const companyName = formData.get("companyName")?.toString();
+  const jobTitle = formData.get("jobTitle")?.toString();
+  const startDate = formData.get("startDate")?.toString();
+  const endDate = formData.get("endDate")?.toString();
+  const description = formData.get("description")?.toString();
+
+  if (!companyName || !jobTitle) {
+    return;
+  }
+
+  const profileId = await getCandidateProfileId(session.userId);
+
+  await prisma.workExperience.create({
+    data: {
+      companyName,
+      jobTitle,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+      description: description || null,
+      profileId,
+    },
+  });
+
+  revalidatePath("/candidate/dashboard");
+}
+
 export default async function CandidateDashboardPage() {
   const session = await requireRole(["CANDIDATE"]);
 
@@ -188,6 +289,169 @@ export default async function CandidateDashboardPage() {
                 Update Profile
                 </button>
             </form>
+
+            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="font-bold text-slate-900">Skills</h3>
+
+                <form action={addSkill} className="mt-3 flex gap-3">
+                <input
+                    name="name"
+                    placeholder="Example: React"
+                    required
+                    className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <button
+                    type="submit"
+                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                    Add
+                </button>
+                </form>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                {profile?.skills.length ? (
+                    profile.skills.map((skill) => (
+                    <span
+                        key={skill.id}
+                        className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
+                    >
+                        {skill.name}
+                    </span>
+                    ))
+                ) : (
+                    <p className="text-sm text-slate-500">No skills added yet.</p>
+                )}
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="font-bold text-slate-900">Education</h3>
+
+                <form action={addEducation} className="mt-3 grid gap-3">
+                <input
+                    name="school"
+                    placeholder="School or university"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                    name="degree"
+                    placeholder="Degree"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                    name="fieldOfStudy"
+                    placeholder="Field of study"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <input
+                    name="startYear"
+                    type="number"
+                    placeholder="Start year"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                    />
+
+                    <input
+                    name="endYear"
+                    type="number"
+                    placeholder="End year"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                    />
+                </div>
+
+                <button
+                    type="submit"
+                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                    Add Education
+                </button>
+                </form>
+
+                <div className="mt-4 space-y-3">
+                {profile?.education.length ? (
+                    profile.education.map((education) => (
+                    <div key={education.id} className="rounded-xl bg-slate-50 p-3">
+                        <p className="font-semibold text-slate-900">{education.degree}</p>
+                        <p className="text-sm text-slate-600">{education.school}</p>
+                    </div>
+                    ))
+                ) : (
+                    <p className="text-sm text-slate-500">No education added yet.</p>
+                )}
+                </div>
+            </div>
+
+            <div className="rounded-xl border border-slate-200 p-4">
+                <h3 className="font-bold text-slate-900">Work Experience</h3>
+
+                <form action={addWorkExperience} className="mt-3 grid gap-3">
+                <input
+                    name="companyName"
+                    placeholder="Company name"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <input
+                    name="jobTitle"
+                    placeholder="Job title"
+                    required
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <input
+                    name="startDate"
+                    type="date"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                    />
+
+                    <input
+                    name="endDate"
+                    type="date"
+                    className="rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                    />
+                </div>
+
+                <textarea
+                    name="description"
+                    placeholder="Short description"
+                    className="min-h-24 rounded-xl border border-slate-300 px-4 py-3 text-sm"
+                />
+
+                <button
+                    type="submit"
+                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                >
+                    Add Experience
+                </button>
+                </form>
+
+                <div className="mt-4 space-y-3">
+                {profile?.workExperience.length ? (
+                    profile.workExperience.map((experience) => (
+                    <div key={experience.id} className="rounded-xl bg-slate-50 p-3">
+                        <p className="font-semibold text-slate-900">
+                        {experience.jobTitle}
+                        </p>
+                        <p className="text-sm text-slate-600">
+                        {experience.companyName}
+                        </p>
+                    </div>
+                    ))
+                ) : (
+                    <p className="text-sm text-slate-500">No work experience added yet.</p>
+                )}
+                </div>
+            </div>
+            </div>
         </div>
 
         <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
