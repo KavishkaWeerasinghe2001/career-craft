@@ -1,4 +1,6 @@
 import prisma from "@/lib/prisma";
+import { requireRole } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 
 type JobDetailPageProps = {
@@ -6,6 +8,44 @@ type JobDetailPageProps = {
     id: string;
   }>;
 };
+
+async function applyForJob(formData: FormData) {
+  "use server";
+
+  const session = await requireRole(["CANDIDATE"]);
+
+  const jobId = formData.get("jobId")?.toString();
+  const coverLetter = formData.get("coverLetter")?.toString();
+
+  if (!jobId) {
+    return;
+  }
+
+  const existingApplication = await prisma.application.findUnique({
+    where: {
+      candidateId_jobId: {
+        candidateId: session.userId,
+        jobId,
+      },
+    },
+  });
+
+  if (existingApplication) {
+    return;
+  }
+
+  await prisma.application.create({
+    data: {
+      candidateId: session.userId,
+      jobId,
+      coverLetter: coverLetter || null,
+    },
+  });
+
+  revalidatePath(`/jobs/${jobId}`);
+  revalidatePath("/candidate/dashboard");
+  revalidatePath("/recruiter/dashboard");
+}
 
 function formatJobType(type: string) {
   return type
@@ -22,9 +62,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
       id,
     },
     include: {
-      company: true,
-      category: true,
-      recruiter: true,
+     company: true,
+     category: true,
+     recruiter: true,
+     applications: true,
     },
   });
 
@@ -74,10 +115,10 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
             </div>
 
             <a
-              href="/login"
-              className="rounded-xl bg-blue-600 px-6 py-3 text-center font-semibold text-white hover:bg-blue-700"
+                href="#apply"
+                className="rounded-xl bg-blue-600 px-6 py-3 text-center font-semibold text-white hover:bg-blue-700"
             >
-              Login to Apply
+                Apply Now
             </a>
           </div>
         </section>
@@ -137,19 +178,37 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
               </div>
             </div>
 
-            <div className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
-              <h2 className="text-xl font-bold">Ready to apply?</h2>
-              <p className="mt-3 text-sm leading-6 text-slate-300">
-                Login as a candidate to submit your application and track your
-                application status.
-              </p>
+            <div id="apply" className="rounded-3xl bg-slate-950 p-6 text-white shadow-sm">
+                <h2 className="text-xl font-bold">Apply for this Job</h2>
 
-              <a
-                href="/login"
-                className="mt-5 block rounded-xl bg-white px-5 py-3 text-center font-semibold text-slate-950 hover:bg-slate-200"
-              >
-                Login to Apply
-              </a>
+                <p className="mt-3 text-sm leading-6 text-slate-300">
+                    Login as a candidate and submit your application. Your application status
+                    will appear in your candidate dashboard.
+                </p>
+
+                <form action={applyForJob} className="mt-5 space-y-4">
+                    <input type="hidden" name="jobId" value={job.id} />
+
+                    <textarea
+                    name="coverLetter"
+                    placeholder="Write a short cover letter"
+                    className="min-h-32 w-full rounded-xl border border-slate-700 bg-white px-4 py-3 text-sm text-slate-900"
+                    />
+
+                    <button
+                    type="submit"
+                    className="w-full rounded-xl bg-white px-5 py-3 text-center font-semibold text-slate-950 hover:bg-slate-200"
+                    >
+                    Submit Application
+                    </button>
+                </form>
+
+                <a
+                    href="/login"
+                    className="mt-3 block text-center text-sm font-medium text-blue-200 hover:text-white"
+                >
+                    Not logged in? Login first
+                </a>
             </div>
           </aside>
         </section>
