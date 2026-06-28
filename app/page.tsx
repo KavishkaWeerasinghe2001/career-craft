@@ -1,51 +1,10 @@
+import PublicFooter from "@/components/PublicFooter";
+import PublicHeader from "@/components/PublicHeader";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#080312] text-white">
-      <nav className="border-b border-white/10 bg-black/30 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <a href="/" className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-2xl bg-purple-600 text-lg font-black text-white shadow-lg shadow-purple-600/30">
-              CC
-            </span>
-
-            <div>
-              <p className="text-xl font-bold">Career Craft</p>
-              <p className="text-xs text-purple-200">Job Board</p>
-            </div>
-          </a>
-
-          <div className="hidden items-center gap-8 text-sm font-semibold text-slate-300 md:flex">
-            <a href="/jobs" className="hover:text-white">
-              Find Jobs
-            </a>
-            <a href="/login" className="hover:text-white">
-              Login
-            </a>
-            <a
-              href="/register"
-              className="rounded-xl bg-purple-600 px-5 py-2.5 text-white shadow-lg shadow-purple-600/30 hover:bg-purple-700"
-            >
-              Get Started
-            </a>
-          </div>
-
-          <div className="flex gap-3 md:hidden">
-            <a
-              href="/jobs"
-              className="rounded-xl border border-white/20 px-3 py-2 text-sm font-semibold text-white"
-            >
-              Jobs
-            </a>
-            <a
-              href="/login"
-              className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-950"
-            >
-              Login
-            </a>
-          </div>
-        </div>
-      </nav>
-
+     <PublicHeader />
       <section className="relative overflow-hidden">
         <div className="absolute left-0 top-20 h-72 w-72 rounded-full bg-purple-700/30 blur-3xl" />
         <div className="absolute right-0 top-36 h-96 w-96 rounded-full bg-fuchsia-600/20 blur-3xl" />
@@ -134,6 +93,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+     <PublicFooter />
     </main>
   );
 }

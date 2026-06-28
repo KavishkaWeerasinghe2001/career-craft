@@ -1,3 +1,5 @@
+import PublicFooter from "@/components/PublicFooter";
+import PublicHeader from "@/components/PublicHeader";
 import prisma from "@/lib/prisma";
 import { requireRole } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -74,12 +76,11 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-8">
-      <div className="mx-auto max-w-5xl">
-        <a href="/jobs" className="text-sm font-medium text-blue-600">
-          ← Back to Jobs
-        </a>
+    <main className="min-h-screen bg-slate-100">
+     <PublicHeader />
 
+     <div className="px-6 py-8">
+      <div className="mx-auto max-w-5xl">
         <section className="mt-6 rounded-3xl bg-white p-8 shadow-sm">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
             <div>
@@ -213,6 +214,8 @@ export default async function JobDetailPage({ params }: JobDetailPageProps) {
           </aside>
         </section>
       </div>
+     </div>
+     <PublicFooter />  
     </main>
   );
 }
