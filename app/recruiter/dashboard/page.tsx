@@ -183,11 +183,20 @@ export default async function RecruiterDashboardPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-8">
+    <main className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between">
-          <a href="/" className="text-sm font-medium text-blue-600">
-            ← Career Craft
+          <a href="/" className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-600 text-base font-black text-white shadow-lg shadow-purple-600/30">
+              CC
+            </span>
+
+            <span>
+              <span className="block text-lg font-bold leading-none text-slate-950">
+                Career Craft
+              </span>
+              <span className="mt-1 block text-xs text-purple-700">Job Board</span>
+            </span>
           </a>
 
           <div className="flex gap-3">
@@ -195,7 +204,7 @@ export default async function RecruiterDashboardPage() {
               href="/jobs"
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              Jobs
+              Find Jobs
             </a>
 
             <a
@@ -207,7 +216,7 @@ export default async function RecruiterDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl bg-slate-950 p-8 text-white">
+        <div className="mt-6 rounded-3xl bg-purple-950 p-8 text-white shadow-xl shadow-purple-950/20">
           <p className="text-sm text-green-200">Recruiter Area</p>
 
           <h1 className="mt-2 text-3xl font-bold">Recruiter Dashboard</h1>
@@ -220,7 +229,7 @@ export default async function RecruiterDashboardPage() {
 
         <div className="mt-8 grid gap-5 md:grid-cols-5">
           {pipeline.map((item) => (
-            <div key={item.label} className="rounded-2xl bg-white p-6 shadow-sm">
+            <div key={item.label} className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
               <p className="text-sm text-slate-500">{item.label}</p>
               <h2 className="mt-2 text-3xl font-bold text-slate-900">
                 {item.value}
@@ -233,7 +242,7 @@ export default async function RecruiterDashboardPage() {
             <h2 className="text-xl font-bold text-slate-900">Create Job Post</h2>
 
             {companies.length === 0 ? (
-                <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+                <div className="mt-4 rounded-xl border border-purple-100 bg-slate-50 p-5">
                 <p className="font-medium text-slate-900">No company found</p>
                 <p className="mt-1 text-sm text-slate-600">
                     You need a company before creating job posts.
@@ -313,7 +322,7 @@ export default async function RecruiterDashboardPage() {
 
                 <button
                     type="submit"
-                    className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 md:col-span-2"
+                    className="rounded-xl bg-purple-800 px-5 py-3 text-sm font-semibold text-white hover:bg-purple-900 md:col-span-2"
                 >
                     Create Job
                 </button>
@@ -322,11 +331,11 @@ export default async function RecruiterDashboardPage() {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">My Job Posts</h2>
 
             {jobs.length === 0 ? (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mt-4 rounded-xl border border-purple-100 bg-slate-50 p-5">
                 <p className="font-medium text-slate-900">
                   You have not created any jobs yet.
                 </p>
@@ -339,7 +348,7 @@ export default async function RecruiterDashboardPage() {
                 {jobs.map((job) => (
                   <div
                     key={job.id}
-                    className="rounded-xl border border-slate-200 p-4"
+                    className="rounded-xl border border-purple-100 p-4"
                   >
                     <p className="font-semibold text-slate-900">{job.title}</p>
                     <p className="text-sm text-slate-600">{job.company.name}</p>
@@ -352,13 +361,13 @@ export default async function RecruiterDashboardPage() {
             )}
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
             <h2 className="text-xl font-bold text-slate-900">
               Recent Applicants
             </h2>
 
             {applications.length === 0 ? (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5">
+              <div className="mt-4 rounded-xl border border-purple-100 bg-slate-50 p-5">
                 <p className="font-medium text-slate-900">
                   No applications yet.
                 </p>
@@ -371,7 +380,7 @@ export default async function RecruiterDashboardPage() {
                 {applications.map((application) => (
                   <div
                     key={application.id}
-                    className="rounded-xl border border-slate-200 p-4"
+                    className="rounded-xl border border-purple-100 p-4"
                   >
                     <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
                       <div>
@@ -403,7 +412,7 @@ export default async function RecruiterDashboardPage() {
 
                         <button
                             type="submit"
-                            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                            className="rounded-xl bg-purple-800 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-900"
                         >
                             Update
                         </button>
