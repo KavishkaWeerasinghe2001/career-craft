@@ -62,21 +62,55 @@ export default async function AdminDashboardPage() {
     { label: "Categories", value: totalCategories },
   ];
 
+  const managementLinks = [
+    {
+      title: "Manage Users",
+      description: "View all admins, recruiters, and candidates.",
+      href: "/admin/users",
+    },
+    {
+      title: "Manage Companies",
+      description: "View and create companies used by job posts.",
+      href: "/admin/companies",
+    },
+    {
+      title: "Manage Categories",
+      description: "View and create job categories.",
+      href: "/admin/categories",
+    },
+    {
+      title: "Platform Settings",
+      description: "View and update platform settings.",
+      href: "/admin/settings",
+    },
+  ];
+
   return (
     <main className="min-h-screen bg-slate-100 px-6 py-8">
       <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <a href="/" className="text-sm font-medium text-blue-600">
             ← Career Craft
           </a>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
+            {managementLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              >
+                {link.title}
+              </a>
+            ))}
+
             <a
               href="/jobs"
               className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
               Jobs
             </a>
+
             <a
               href="/logout"
               className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
