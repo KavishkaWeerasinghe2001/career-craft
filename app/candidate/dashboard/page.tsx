@@ -192,11 +192,20 @@ export default async function CandidateDashboardPage() {
   ).length;
 
   return (
-    <main className="min-h-screen bg-slate-100 px-6 py-8">
+    <main className="min-h-screen bg-slate-50 px-6 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center justify-between">
-          <a href="/" className="text-sm font-medium text-blue-600">
-            ← Career Craft
+          <a href="/" className="flex items-center gap-3">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-600 text-base font-black text-white shadow-lg shadow-purple-600/30">
+              CC
+            </span>
+
+            <span>
+              <span className="block text-lg font-bold leading-none text-slate-950">
+                Career Craft
+              </span>
+              <span className="mt-1 block text-xs text-purple-700">Job Board</span>
+            </span>
           </a>
 
           <div className="flex gap-3">
@@ -216,7 +225,7 @@ export default async function CandidateDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-6 rounded-3xl bg-slate-950 p-8 text-white">
+        <div className="mt-6 rounded-3xl bg-purple-950 p-8 text-white shadow-xl shadow-purple-950/20">
           <p className="text-sm text-purple-200">Candidate Area</p>
 
           <h1 className="mt-2 text-3xl font-bold">Candidate Dashboard</h1>
@@ -228,21 +237,21 @@ export default async function CandidateDashboardPage() {
         </div>
 
         <div className="mt-8 grid gap-5 md:grid-cols-3">
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Applications</p>
             <h2 className="mt-2 text-3xl font-bold text-slate-900">
               {applications.length}
             </h2>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Profile Completion</p>
             <h2 className="mt-2 text-3xl font-bold text-slate-900">
               {profileCompletion}%
             </h2>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border border-purple-100 bg-white p-6 shadow-sm">
             <p className="text-sm text-slate-500">Interviews</p>
             <h2 className="mt-2 text-3xl font-bold text-slate-900">
               {interviewCount}
@@ -284,7 +293,7 @@ export default async function CandidateDashboardPage() {
 
                 <button
                 type="submit"
-                className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 md:col-span-2"
+                className="rounded-xl bg-purple-800 px-5 py-3 text-sm font-semibold text-white hover:bg-purple-900 md:col-span-2"
                 >
                 Update Profile
                 </button>
@@ -304,7 +313,7 @@ export default async function CandidateDashboardPage() {
 
                 <button
                     type="submit"
-                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="rounded-xl bg-purple-800 px-4 py-3 text-sm font-semibold text-white hover:bg-purple-900"
                 >
                     Add
                 </button>
@@ -315,7 +324,7 @@ export default async function CandidateDashboardPage() {
                     profile.skills.map((skill) => (
                     <span
                         key={skill.id}
-                        className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700"
+                        className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700"
                     >
                         {skill.name}
                     </span>
@@ -368,7 +377,7 @@ export default async function CandidateDashboardPage() {
 
                 <button
                     type="submit"
-                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="rounded-xl bg-purple-800 px-4 py-3 text-sm font-semibold text-white hover:bg-purple-900"
                 >
                     Add Education
                 </button>
@@ -428,7 +437,7 @@ export default async function CandidateDashboardPage() {
 
                 <button
                     type="submit"
-                    className="rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="rounded-xl bg-purple-800 px-4 py-3 text-sm font-semibold text-white hover:bg-purple-900"
                 >
                     Add Experience
                 </button>
@@ -469,7 +478,7 @@ export default async function CandidateDashboardPage() {
 
               <a
                 href="/jobs"
-                className="mt-4 inline-flex rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+                className="mt-4 inline-flex rounded-xl bg-purple-800 px-5 py-3 text-sm font-semibold text-white hover:bg-purple-900"
               >
                 Browse Jobs
               </a>
@@ -501,7 +510,7 @@ export default async function CandidateDashboardPage() {
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                    <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
                       {formatStatus(application.status)}
                     </span>
                   </div>
@@ -523,7 +532,7 @@ export default async function CandidateDashboardPage() {
                           key={status}
                           className={
                             application.status === status
-                              ? "rounded-full bg-blue-600 px-3 py-1 font-medium text-white"
+                              ? "rounded-full bg-purple-800 px-3 py-1 font-medium text-white"
                               : "rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-600"
                           }
                         >
