@@ -82,13 +82,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </div>
         </form>
 
-        <div className="mt-6 rounded-2xl bg-purple-50 p-4 text-sm text-slate-700">
-          <p className="font-bold text-slate-950">Test Accounts</p>
-          <p className="mt-2">Admin: admin@careercraft.test</p>
-          <p>Recruiter: recruiter@careercraft.test</p>
-          <p>Candidate: candidate@careercraft.test</p>
-          <p className="mt-2">Password: Password123!</p>
-        </div>
+        
 
         <p className="mt-6 text-center text-sm text-slate-600">
           Do not have an account?{" "}
